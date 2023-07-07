@@ -1,25 +1,72 @@
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import "./App.css";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import Header from "./Components/Header";
+import { styled } from "styled-components";
+import SideBar from "./Components/SideBar";
+import Chat from "./Components/Chat";
+import { useAuthState } from "react-firebase-hooks/auth";
+import { auth } from "./firebase";
+import Login from "./Components/Login";
+import Spinner from "react-spinkit";
 
 function App() {
+  const [user, loading] = useAuthState(auth);
+
+  if (loading) {
+    return (
+      <AppLoading>
+        <AppLoadingContents>
+          <img
+            src="https://cdn.mos.cms.futurecdn.net/SDDw7CnuoUGax6x9mTo7dd.jpg"
+            alt=""
+          />
+          <Spinner name="ball-spin-fade-loader" color="purple" fadeIn="none" />
+        </AppLoadingContents>
+      </AppLoading>
+    );
+  }
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <Router>
+        {!user ? (
+          <Login />
+        ) : (
+          <>
+            <Header />
+            <AppBody>
+              <SideBar />
+              <Routes>
+                <Route path="/" element={<Chat />} exact />
+              </Routes>
+            </AppBody>
+          </>
+        )}
+      </Router>
     </div>
   );
 }
 
 export default App;
+
+const AppLoading = styled.div``;
+
+const AppLoadingContents = styled.div`
+  text-align: center;
+  padding-bottom: 100px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  > img {
+    height: 100px;
+    padding: 20px;
+    margin-bottom: 40px;
+  }
+`;
+
+const AppBody = styled.div`
+  display: flex;
+  height: 100vh;
+`;
